@@ -44,7 +44,9 @@ export const expenseByID = async (req, res, next, id) => {
     if (!expense)
       return res
         .status(404)
-        .json({ message: `Sorry, we couldn't find the expense with id ${id}` });
+        .json({
+          message: `Sorry, we couldn't find given the expense`,
+        });
     req.expense = expense;
     next();
   } catch (err) {
@@ -65,9 +67,18 @@ export const update = async (req, res) => {
   }
 };
 export const isOwner = (req, res, next) => {
-  const authorized = req.expense && req.auth && req.expense.owner._id == req.auth._id;
+  const authorized =
+    req.expense && req.auth && req.expense.owner._id == req.auth._id;
   if (!authorized) {
     return res.status(403).json({ error: "Sorry, you're not authorized" });
   }
   next();
+};
+export const remove = async (req, res) => {
+  try {
+    const deletedExpense = await Expense.findByIdAndDelete(req.expense._id);
+    return res.json(deletedExpense);
+  } catch (err) {
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
 };
