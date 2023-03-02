@@ -1,5 +1,6 @@
 import errorHandler from "../helpers/dbErrorHandler";
 import Expense from "../models/expense.model";
+import extend from "lodash/extend";
 export const listByUser = async (req, res) => {
   const firstDay = req.query.firstDay;
   const lastDay = req.query.lastDay;
@@ -32,4 +33,41 @@ export const create = async (req, res) => {
       error: errorHandler.getErrorMessage(err),
     });
   }
+};
+export const expenseByID = async (req, res, next, id) => {
+  try {
+    const expense = await Expense.findOne({ _id: id }).populate(
+      "owner",
+      "_id name"
+    );
+
+    if (!expense)
+      return res
+        .status(404)
+        .json({ message: `Sorry, we couldn't find the expense with id ${id}` });
+    req.expense = expense;
+    next();
+  } catch (err) {
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+export const update = async (req, res) => {
+  try {
+    let updatedExpense = req.expense;
+    console.log(updatedExpense);
+    updatedExpense = extend(updatedExpense, req.body);
+    console.log(updatedExpense);
+    updatedExpense.updated = Date.now();
+    await updatedExpense.save();
+    return res.json(updatedExpense);
+  } catch (err) {
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+export const isOwner = (req, res, next) => {
+  const authorized = req.expense && req.auth && req.expense.owner._id == req.auth._id;
+  if (!authorized) {
+    return res.status(403).json({ error: "Sorry, you're not authorized" });
+  }
+  next();
 };
