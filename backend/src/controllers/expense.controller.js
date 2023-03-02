@@ -21,3 +21,15 @@ export const listByUser = async (req, res) => {
     });
   }
 };
+export const create = async (req, res) => {
+  try {
+    req.body.owner = req.auth._id;
+    const newExpense = new Expense(req.body);
+    await newExpense.save();
+    return res.status(201).json({ message: "Expense created successfully" });
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err),
+    });
+  }
+};
