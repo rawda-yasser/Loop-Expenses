@@ -59,4 +59,28 @@ describe("Expenses reports", () => {
       ])
     );
   });
+  test("get /api/expenses/plot", async () => {
+    const date = new Date(),
+      m = date.getMonth();
+    const response = await request(server)
+      .get(`/api/expenses/plot?month=${m}`)
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body).toHaveLength(3);
+    expect(response.body[0].x).toEqual(7);
+  });
+  test("get /api/expenses/yearly", async () => {
+    const date = new Date(),
+      y = date.getFullYear();
+    const response = await request(server)
+      .get(`/api/expenses/plot?year=${y}`)
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+    console.log(response.body);
+    expect(response.body).toHaveLength(3);
+    expect(response.body[0].x).toEqual(7);
+    expect(response.body[0].y).toEqual(100);
+  });
 });
