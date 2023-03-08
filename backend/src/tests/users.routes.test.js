@@ -1,6 +1,7 @@
 import request from "supertest";
 import server from "../server";
 import User from "../models/user.model";
+import { authHeader, user1 } from "../utils/seedFn";
 describe("post /api/users", () => {
   test("creating a new account", async () => {
     const response = await request(server)
@@ -56,5 +57,20 @@ describe("get /api/users", () => {
     expect(response.body).toHaveLength(2);
     expect(response.body[0].name).toEqual("Rawda Yasser");
     expect(response.body[1].name).toEqual("Rawda Yasser2");
+  });
+});
+describe("get /api/users/:userId", () => {
+  test("get user data", async () => {
+    const response = await request(server)
+      .get(`/api/users/${user1._id}`)
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body.name).toEqual("Rawda Yasser");
+    expect(response.body.email).toBe(undefined);
+  });
+  test("get user data with no authorization should fail", async () => {
+    await request(server).get(`/api/users/${user1._id}`).expect(401);
   });
 });
