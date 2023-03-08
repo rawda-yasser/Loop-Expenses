@@ -65,6 +65,9 @@ export const update = async (req, res) => {
     return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
 };
+export const read = async (req, res) => {
+  return res.json(req.expense);
+};
 export const isOwner = (req, res, next) => {
   const authorized =
     req.expense && req.auth && req.expense.owner._id == req.auth._id;
@@ -93,11 +96,13 @@ export const currentMonthlyPreview = async (req, res) => {
   const tomorrow = new Date();
   today.setUTCHours(0, 0, 0, 0);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   const yesterday = new Date();
   yesterday.setUTCHours(0, 0, 0, 0);
   yesterday.setDate(yesterday.getDate() - 1);
   console.log(firstDay, lastDay, today, tomorrow, yesterday);
+  // const all = await Expense.find({});
+  // console.log("ALL", all);
   try {
     let monthlyPreview = await Expense.aggregate([
       {
@@ -147,9 +152,155 @@ export const currentMonthlyPreview = async (req, res) => {
       yesterday: monthlyPreview[0].yesterday[0],
     };
     return res.json(result);
-    
   } catch (err) {
-    console.log(err)
-    return res.status(400).json({ error: errorHandler.getErrorMessage(err)});
+    console.log(err);
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+export const expenseByCategory = async (req, res) => {
+  const date = new Date(),
+    y = date.getFullYear(),
+    m = date.getMonth();
+  const firstDay = new Date(y, m, 1);
+  const lastDay = new Date(y, m + 1, 0);
+  // const all = await Expense.find({ owner: req.auth._id });
+  // console.log("ALL", all);
+  try {
+    const summary = await Expense.aggregate([
+      {
+        $match: {
+          incurredOn: {
+            $gte: firstDay,
+            $lt: lastDay,
+          },
+          owner: new mongoose.Types.ObjectId(req.auth._id),
+        },
+      },
+      {
+        $group: {
+          _id: { category: "$category" },
+          totalSpent: { $sum: "$amount" },
+          averageSpent: { $avg: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id.category",
+          total: "$totalSpent",
+          average: "$averageSpent",
+        },
+      },
+    ]);
+    res.json(summary);
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+export const plotExpenses = async (req, res) => {
+  const date = new Date(),
+    y = date.getFullYear(),
+    m = date.getMonth();
+  date.setMonth(req.query.month);
+  console.log("DATE", date);
+  const firstDay = new Date(y, m, 1);
+  const lastDay = new Date(y, m + 1, 0);
+  try {
+    const expenses = await Expense.aggregate([
+      {
+        $match: {
+          incurredOn: {
+            $gte: firstDay,
+            $lt: lastDay,
+          },
+          owner: new mongoose.Types.ObjectId(req.auth._id),
+        },
+      },
+      { $project: { x: { $dayOfMonth: "$incurredOn" }, y: "$amount" } },
+    ]);
+    return res.json(expenses);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+export const yearlyExpenses = async (req, res) => {
+  try {
+    const date = new Date();
+    const y = req.query.year;
+    date.setFullYear(y);
+    const firstDay = new Date(y, 0, 1);
+    const lastDay = new Date(y, 12, 0);
+    const result = await Expense.aggregate([
+      {
+        $match: {
+          incurredOn: {
+            $gte: firstDay,
+            $lt: lastDay,
+          },
+          owner: new mongoose.Types.ObjectId(req.auth._id),
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $month: "$incurredOn",
+          },
+          totalSpent: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          x: "$_id",
+          y: "$totalSpent",
+        },
+      },
+    ]);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+export const averageByCategory = async (req, res) => {
+  try {
+    const firstDay = new Date(req.query.firstDay);
+    const lastDay = new Date(req.query.lastDay);
+
+    const result = await Expense.aggregate([
+      {
+        $match: {
+          owner: new mongoose.Types.ObjectId(req.auth._id),
+          incurredOn: {
+            $gte: firstDay,
+            $lte: lastDay,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { category: "$category" },
+          totalSpent: { $sum: "$amount" },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.category",
+          averageSpent: { $avg: "$totalSpent" },
+        },
+      },
+      {
+        $project: {
+          x: "$_id",
+          y: "$averageSpent",
+        },
+      },
+    ]);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+    I;
   }
 };
