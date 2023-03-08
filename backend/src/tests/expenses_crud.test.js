@@ -1,6 +1,6 @@
 import request from "supertest";
 import server from "../server";
-import { authHeader, user1 } from "../utils/seedFn";
+import { authHeader, expense1, user1 } from "../utils/seedFn";
 import Expense from "../models/expense.model";
 describe("get /api/expenses/", () => {
   test("get all expenses for user1", async () => {
@@ -32,9 +32,27 @@ describe("post /api/expenses/", () => {
       .set("authorization", authHeader)
       .expect(201)
       .expect("Content-Type", /json/);
-      expect(response.body.message).toEqual("Expense created successfully");
-      const allExpensesForUser1 = await Expense.find({owner:user1._id});
-      expect(allExpensesForUser1).toHaveLength(4)
-      
+    expect(response.body.message).toEqual("Expense created successfully");
+    const allExpensesForUser1 = await Expense.find({ owner: user1._id });
+    expect(allExpensesForUser1).toHaveLength(4);
+  });
+});
+describe("get /api/expenses/:expenseId", () => {
+  test("get an expense for user1 should succeed", async () => {
+    const response = await request(server)
+      .get(`/api/expenses/${expense1._id}`)
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body.title).toEqual(expense1.title);
+    expect(response.body.category).toEqual(expense1.category);
+  });
+  test("get an expense for user1 with no authorization", async () => {
+    const response = await request(server)
+      .get(`/api/expenses/${expense1._id}`)
+
+      .expect(401);
+
+    expect(response.body.title).toEqual(undefined);
   });
 });
