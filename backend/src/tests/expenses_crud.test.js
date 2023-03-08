@@ -72,7 +72,20 @@ describe("put /api/expenses/:expenseId", () => {
       .put(`/api/expenses/${expense1._id}`)
       .send({ title: "Restaurant updated" })
       .expect(401);
-
     expect(response.body.title).toEqual(undefined);
+  });
+});
+describe("delete /api/expenses/:expenseId", () => {
+  test("delete an expense for user1 should succeed", async () => {
+    const response = await request(server)
+      .delete(`/api/expenses/${expense1._id}`)
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body.title).toEqual("Restaurants");
+    expect(response.body.category).toEqual(expense1.category);
+  });
+  test("delete an expense for user1 with no authorization", async () => {
+    await request(server).delete(`/api/expenses/${expense1._id}`).expect(401);
   });
 });
