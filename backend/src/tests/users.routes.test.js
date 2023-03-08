@@ -2,6 +2,10 @@ import request from "supertest";
 import server from "../server";
 import User from "../models/user.model";
 import { authHeader, user1 } from "../utils/seedFn";
+import config from "../config";
+import jwt from "jsonwebtoken";
+import { response } from "express";
+
 describe("post /api/users", () => {
   test("creating a new account", async () => {
     const response = await request(server)
@@ -72,5 +76,38 @@ describe("get /api/users/:userId", () => {
   });
   test("get user data with no authorization should fail", async () => {
     await request(server).get(`/api/users/${user1._id}`).expect(401);
+  });
+});
+describe("/api/users/:userId delete", () => {
+  test("delete user data", async () => {
+    const deleted = new User({
+      name: "deleted",
+      email: "deleted@test.com",
+      password: "deleted@test.com",
+    });
+    await deleted.save();
+    // console.log(await User.findOne({email: "deleted@test.com"}))
+    const deletedAuthHeader =
+      "Bearer " + jwt.sign({ _id: deleted._id }, config.jwtSecret);
+
+    const response = await request(server)
+      .delete(`/api/users/${deleted._id}`)
+      .set("authorization", deletedAuthHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body.name).toEqual(deleted.name);
+  });
+});
+describe("/api/users/:userId put", () => {
+  test("update name using formidable", async () => {
+    const response = await request(server)
+      .put(`/api/users/${user1._id}`)
+      .set("authorization", authHeader)
+      .set({ connetion: "keep-alive" })
+      .field("name", "Rawda updated")
+      .field("password", user1.password)
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body.name).toEqual("Rawda updated");
   });
 });
