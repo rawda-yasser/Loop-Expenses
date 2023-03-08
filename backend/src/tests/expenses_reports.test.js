@@ -37,4 +37,26 @@ describe("Expenses reports", () => {
       ])
     );
   });
+  test("get /api/expenses/average-by-category", async () => {
+    const date = new Date(),
+      y = date.getFullYear(),
+      m = date.getMonth();
+    const firstDay = new Date(y, m, 1);
+    const lastDay = new Date(y, m + 1, 0);
+    const response = await request(server)
+      .get(
+        `/api/expenses/average-by-category?firstDay=${firstDay}&lastDay=${lastDay}`
+      )
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        { _id: "Rent", x: "Rent", y: 200 },
+        { _id: "Food", x: "Food", y: 100 },
+        { _id: "Internet", x: "Internet", y: 100 },
+      ])
+    );
+  });
 });
