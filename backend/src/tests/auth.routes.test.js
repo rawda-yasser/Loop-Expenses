@@ -1,50 +1,36 @@
-import request from "supertest";
+import { user1 } from "../utils/seedFn";
 import server from "../server";
+import jwt from "jsonwebtoken";
 import User from "../models/user.model";
-describe("create accounts", () => {
-  test("creating a new account", async () => {
+import request from "supertest";
+import config from "../config";
+describe("/auth/login", () => {
+  test("logging with existing email and password should succeed", async () => {
     const response = await request(server)
-      .post("/api/users")
+      .post("/auth/login")
       .send({
-        email: "test123@test.com",
-        name: "test123",
-        password: "test123@test.com",
+        email: user1.email,
+        password: user1.password,
       })
       .expect(200)
       .expect("Content-Type", /json/);
-    expect(response.body).toEqual({
-      message: "Successfully signed up",
-    });
-    const user = await User.findOne({ email: "test123@test.com" });
-    expect(user.name).toEqual("test123");
-    expect(user.email).toEqual("test123@test.com");
-  });
-  test("creating a new account with duplicate email should fail", async () => {
-    await new User({
-      email: "test1@test.com",
-      password: "test1@test.com",
-      name: "test1",
-    }).save();
-    await request(server)
-      .post("/api/users")
-      .send({
-        email: "test1@test.com",
-        name: "test1",
-        password: "test1@test.com",
-      })
-      .expect(400)
-      .expect("Content-Type", /json/);
-  });
-  test("creating a new account with invalid password should fail", async () => {
 
-    await request(server)
-      .post("/api/users")
+    expect(response.body.token).toBeDefined();
+    expect(response.body.user.name).toEqual(user1.name);
+  });
+  test("logging with wrong credentials should fail", async () => {
+    const testUser = new User({name: "Test", email: "wrong_email@test.com", password: "wrong_email@test.com"})
+    await testUser.save()
+    const response = await request(server)
+      .post("/auth/login")
       .send({
-        email: "test1@test.com",
-        name: "test1",
-        password: "test1",
+        email: testUser.email,
+        password: "a wrong password",
       })
-      .expect(400)
+      .expect(401)
       .expect("Content-Type", /json/);
+
+    expect(response.body.token).not.toBeDefined();
+    expect(response.body.error).toEqual("Email and password don't match");
   });
 });
