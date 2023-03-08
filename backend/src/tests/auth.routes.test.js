@@ -19,8 +19,12 @@ describe("/auth/login", () => {
     expect(response.body.user.name).toEqual(user1.name);
   });
   test("logging with wrong credentials should fail", async () => {
-    const testUser = new User({name: "Test", email: "wrong_email@test.com", password: "wrong_email@test.com"})
-    await testUser.save()
+    const testUser = new User({
+      name: "Test",
+      email: "wrong_email@test.com",
+      password: "wrong_email@test.com",
+    });
+    await testUser.save();
     const response = await request(server)
       .post("/auth/login")
       .send({
@@ -32,5 +36,14 @@ describe("/auth/login", () => {
 
     expect(response.body.token).not.toBeDefined();
     expect(response.body.error).toEqual("Email and password don't match");
+  });
+});
+describe("/auth/logout", () => {
+  test("user logs out successfully", async () => {
+    const response = await request(server)
+      .get("/auth/logout")
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body.message).toEqual("You're logged out");
   });
 });
