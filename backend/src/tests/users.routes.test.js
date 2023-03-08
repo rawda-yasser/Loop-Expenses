@@ -1,7 +1,7 @@
 import request from "supertest";
 import server from "../server";
 import User from "../models/user.model";
-describe("create accounts", () => {
+describe("post /api/users", () => {
   test("creating a new account", async () => {
     const response = await request(server)
       .post("/api/users")
@@ -36,7 +36,6 @@ describe("create accounts", () => {
       .expect("Content-Type", /json/);
   });
   test("creating a new account with invalid password should fail", async () => {
-
     await request(server)
       .post("/api/users")
       .send({
@@ -46,5 +45,16 @@ describe("create accounts", () => {
       })
       .expect(400)
       .expect("Content-Type", /json/);
+  });
+});
+describe("get /api/users", () => {
+  test("list all users", async () => {
+    const response = await request(server)
+      .get("/api/users/")
+      .expect(200)
+      .expect("Content-Type", /json/);
+    expect(response.body).toHaveLength(2);
+    expect(response.body[0].name).toEqual("Rawda Yasser");
+    expect(response.body[1].name).toEqual("Rawda Yasser2");
   });
 });
