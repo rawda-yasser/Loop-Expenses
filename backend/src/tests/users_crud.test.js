@@ -4,7 +4,6 @@ import User from "../models/user.model";
 import { authHeader, user1 } from "../utils/seedFn";
 import config from "../config";
 import jwt from "jsonwebtoken";
-import { response } from "express";
 
 describe("post /api/users", () => {
   test("creating a new account", async () => {
@@ -110,4 +109,5 @@ describe("/api/users/:userId put", () => {
       .expect("Content-Type", /json/);
     expect(response.body.name).toEqual("Rawda updated");
   });
+ 
 });
