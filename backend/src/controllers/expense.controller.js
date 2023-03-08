@@ -94,15 +94,15 @@ export const currentMonthlyPreview = async (req, res) => {
   today.setUTCHours(0, 0, 0, 0);
 
   const tomorrow = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  tomorrow.setUTCHours(0, 0, 0, 0);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   const yesterday = new Date();
   yesterday.setUTCHours(0, 0, 0, 0);
   yesterday.setDate(yesterday.getDate() - 1);
   console.log(firstDay, lastDay, today, tomorrow, yesterday);
-  // const all = await Expense.find({});
-  // console.log("ALL", all);
+  const all = await Expense.find({});
+  console.log("ALL", all);
   try {
     let monthlyPreview = await Expense.aggregate([
       {
@@ -151,11 +151,12 @@ export const currentMonthlyPreview = async (req, res) => {
       today: monthlyPreview[0].today[0],
       yesterday: monthlyPreview[0].yesterday[0],
     };
-    return res.json(result);
+    return res.status(200).json(result);
+  
   } catch (err) {
-    console.log(err);
     return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
+  
 };
 export const expenseByCategory = async (req, res) => {
   const date = new Date(),
