@@ -22,4 +22,19 @@ describe("Expenses reports", () => {
       yesterday: { _id: "yesterday", totalSpent: 400 },
     });
   });
+  test("get /api/expenses/expenses-by-category", async () => {
+    const response = await request(server)
+      .get("/api/expenses/expenses-by-category")
+      .set("authorization", authHeader)
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        { category: "Internet", total: 100, average: 100 },
+        { category: "Rent", total: 200, average: 200 },
+        { category: "Food", total: 100, average: 100 },
+      ])
+    );
+  });
 });
