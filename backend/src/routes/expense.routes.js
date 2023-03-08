@@ -7,11 +7,20 @@ import {
   listByUser,
   update,
   remove,
-  currentMonthlyPreview
+  read,
+  currentMonthlyPreview,
+  expenseByCategory,
+  averageByCategory,
+yearlyExpenses,
+  plotExpenses
 } from "../controllers/expense.controller";
 const router = express.Router();
 router.route("/").get(requireLogin, listByUser).post(requireLogin, create);
-router.route("/:expenseId").put(requireLogin, isOwner, update).delete(requireLogin, isOwner, remove);
+router.route("/:expenseId").put(requireLogin, isOwner, update).delete(requireLogin, isOwner, remove).get(requireLogin, isOwner, read);
 router.route("/monthly-preview").get(requireLogin, currentMonthlyPreview)
+router.route("/expenses-by-category").get(requireLogin, expenseByCategory)
+router.route("/average-by-category").get(requireLogin, averageByCategory)
+router.route("/plot").get(requireLogin, plotExpenses)
+router.route("/yearly").get(requireLogin, yearlyExpenses);
 router.param("expenseId", expenseByID);
 export default router;
