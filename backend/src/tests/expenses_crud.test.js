@@ -2,13 +2,24 @@ import request from "supertest";
 import server from "../server";
 import { authHeader, expense1, user1 } from "../utils/seedFn";
 import Expense from "../models/expense.model";
+beforeAll(() => {
+  const DATE_TO_USE = new Date("2023-03-15");
+  const _Date = Date;
+  global.Date = jest.fn(() => DATE_TO_USE);
+  global.Date.UTC = _Date.UTC;
+  global.Date.parse = _Date.parse;
+  global.Date.now = _Date.now;
+  global.Date.setDate = _Date.setDate;
+  global.Date.getDate = _Date.getDate;
+  console.log(new Date());
+});
 describe("get /api/expenses/", () => {
   test("get all expenses for user1", async () => {
-    const date = new Date(),
-      y = date.getFullYear(),
-      m = date.getMonth();
-    const firstDay = new Date(y, m, 1);
-    const lastDay = new Date(y, m + 1, 0);
+    // const date = new Date(),
+    //   y = date.getFullYear(),
+    //   m = date.getMonth();
+    const firstDay = new Date(2023, 3, 1);
+    const lastDay = new Date(2023, 3, 16);
     const response = await request(server)
       .get(`/api/expenses?firstDay=${firstDay}&lastDay=${lastDay}`)
       .set("authorization", authHeader)

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import "dotenv/config";
 import { dbSetting } from "./dbSetting.js";
-
+import User from "./models/user.model.js";
+import Expense from "./models/expense.model.js";
 export const connect = async () => {
   const env = process.env.NODE_ENV || "test";
   const mongoString = dbSetting[env].url;
@@ -25,11 +26,12 @@ export const close = async () => {
 };
 
 // Remove all data from collections
-export const clear = () => {
+export const clear = async () => {
   const collections = mongoose.connection.collections;
-  // console.log(collections);
+
   for (const key in collections) {
-    collections[key].deleteMany();
+    collections[key].deleteMany({}).then(() => console.log("Data deleted"));
   }
-  console.log("Database cleaned");
+  // console.log("USERS", await User.find({}));
+  // console.log("EXPENSES", await Expense.find({}));
 };

@@ -5,6 +5,6 @@ export const dbSetting = {
     url: process.env.MONGODB_TEST_URL,
   },
   development: {
-    url: process.env.MONGODB_URL,
+    url: process.env.MONGODB_URI,
   },
 };

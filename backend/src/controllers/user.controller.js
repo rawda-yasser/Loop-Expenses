@@ -84,6 +84,7 @@ export const update = async (req, res) => {
 export const remove = async (req, res) => {
   try {
     const user = req.profile;
+    // console.log("REQ PROFILE", req.profile);
     const deletedUser = await User.findByIdAndDelete(user._id);
     deletedUser.hashedPassword = undefined;
     deletedUser.salt = undefined;
@@ -98,7 +99,26 @@ export const photo = (req, res, next) => {
   if (req.profile.photo.data) {
     res.set("Content-Type", req.profile.photo.contentType);
     return res.send(req.profile.photo.data);
-  }
+  }describe("put /api/expenses/:expenseId", () => {
+    test("update an expense for user1 should succeed", async () => {
+      const response = await request(server)
+        .put(`/api/expenses/${expense1._id}`)
+        .set("authorization", authHeader)
+        .send({ title: "Restaurant updated" })
+        .expect(200)
+        .expect("Content-Type", /json/);
+      expect(response.body.title).toEqual("Restaurant updated");
+      expect(response.body.category).toEqual(expense1.category);
+    });
+    test("put an expense for user1 with no authorization", async () => {
+      const response = await request(server)
+        .put(`/api/expenses/${expense1._id}`)
+        .send({ title: "Restaurant updated" })
+        .expect(401);
+      expect(response.body.title).toEqual(undefined);
+    });
+  });
+  
   next();
 };
 

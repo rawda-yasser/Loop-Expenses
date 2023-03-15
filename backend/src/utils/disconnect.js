@@ -1,3 +1,6 @@
 import { close } from "../dbConnection.js";
 
-afterAll(async() => await close())
+afterAll(async () => {
+  // jest.useRealTimers();
+  await close();
+});

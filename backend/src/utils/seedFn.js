@@ -1,6 +1,8 @@
 import User from "../models/user.model";
 import Expense from "../models/expense.model";
-let user1, user2, expense1, expense2, expense3;
+import jwt from "jsonwebtoken";
+let user1, user2, expense1, expense2, expense3, authHeader, validAuth;
+import config from "../config";
 const seedUsers = async () => {
   user1 = new User({
     name: "Rawda Yasser",
@@ -14,6 +16,10 @@ const seedUsers = async () => {
     password: "rawda2@test.com",
   });
   await user2.save();
+  validAuth = jwt.sign({ _id: user1._id }, config.jwtSecret);
+
+  authHeader = `Bearer ${validAuth}`;
+  // console.log(authHeader);
   // const users = await User.find({});
   // console.log(users);
 };
@@ -22,6 +28,8 @@ const seedExpenses = async () => {
     title: "Restaurants",
     category: "Food",
     amount: 100,
+    // incurredOn: new Date(new Date().valueOf() - 1000 * 60 * 60 * 24),
+    incurredOn: new Date("2023-03-14"),
     notes: "Hello world",
     owner: user1,
   });
@@ -31,6 +39,7 @@ const seedExpenses = async () => {
     category: "Rent",
     amount: 200,
     notes: "Hello world",
+    incurredOn: new Date("2023-03-15"),
     owner: user1,
   });
   await expense2.save();
@@ -38,6 +47,7 @@ const seedExpenses = async () => {
   expense3 = new Expense({
     title: "Internet connection",
     category: "Internet",
+    incurredOn: new Date("2023-03-15"),
     amount: 100,
     notes: "Hello world",
     owner: user1,
@@ -51,4 +61,4 @@ const seedData = async () => {
   await seedUsers();
   await seedExpenses();
 };
-export { seedData, user1, user2, expense1, expense2, expense3 };
+export { seedData, authHeader, user1, user2, expense1, expense2, expense3 };

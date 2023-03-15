@@ -90,17 +90,25 @@ export const currentMonthlyPreview = async (req, res) => {
     m = date.getMonth();
   const firstDay = new Date(y, m, 1);
   const lastDay = new Date(y, m + 1, 0);
+  console.log("FDAY", firstDay);
+  console.log("LDAY", lastDay);
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
   const tomorrow = new Date();
-  tomorrow.setUTCHours(0, 0, 0, 0);
   tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setUTCHours(0, 0, 0, 0);
 
   const yesterday = new Date();
-  yesterday.setUTCHours(0, 0, 0, 0);
   yesterday.setDate(yesterday.getDate() - 1);
-  console.log(firstDay, lastDay, today, tomorrow, yesterday);
+  yesterday.setUTCHours(0, 0, 0, 0);
+  // console.log("YESTERDAY BEFORE", yesterday)
+  yesterday.setUTCHours(0, 0, 0, 0);
+
+  // console.log(firstDay, lastDay, today, tomorrow, yesterday);
+  console.log("YESTERDAY", yesterday);
+  console.log("TODAY", today);
+  console.log("TOMORROW", tomorrow);
   const all = await Expense.find({});
   console.log("ALL", all);
   try {
@@ -146,17 +154,17 @@ export const currentMonthlyPreview = async (req, res) => {
         },
       },
     ]);
+    console.log("MONTHLY PREVIEW", monthlyPreview);
     const result = {
       month: monthlyPreview[0].month[0],
       today: monthlyPreview[0].today[0],
       yesterday: monthlyPreview[0].yesterday[0],
     };
+    console.log("RESSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", result);
     return res.status(200).json(result);
-  
   } catch (err) {
     return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
-  
 };
 export const expenseByCategory = async (req, res) => {
   const date = new Date(),
@@ -193,7 +201,7 @@ export const expenseByCategory = async (req, res) => {
         },
       },
     ]);
-    res.json(summary);
+    res.status(200).json(summary);
   } catch (err) {
     console.log(err);
     res.status(400).json({ error: errorHandler.getErrorMessage(err) });

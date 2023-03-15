@@ -52,7 +52,7 @@ module.exports = {
 
   // The default configuration for fake timers
   // fakeTimers: {
-  //   "enableGlobally": false
+    // enableGlobally: false,
   // },
 
   // Force coverage collection from ignored files using an array of glob patterns
@@ -197,4 +197,6 @@ module.exports = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
+
+
 };

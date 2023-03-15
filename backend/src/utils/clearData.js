@@ -1,6 +1,6 @@
-import { clear } from "../dbConnection.js";
+import { clear } from "../dbConnection";
 
-beforeEach(() => {
+beforeEach(async() => {
   console.log("CLEAR");
-  clear();
+  await clear();
 });
